@@ -1,3 +1,7 @@
+/**
+ * Styles for the vanilla meme editor (index-editor.html).
+ * Dark gradient theme, upload/controls, text boxes, color picker, share section.
+ */
 * {
     box-sizing: border-box;
 }
@@ -105,21 +109,75 @@ h1 {
     font-weight: 500;
 }
 
-.text-inputs textarea {
-    width: 100%;
+.text-inputs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.add-text-btn {
+    padding: 0.4rem 0.75rem;
+    background: rgba(78, 204, 163, 0.2);
+    color: #4ecca3;
+    border: 1px solid #4ecca3;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.add-text-btn:hover {
+    background: rgba(78, 204, 163, 0.35);
+}
+
+#text-boxes-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.text-box-item {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.text-box-item textarea {
+    flex: 1;
     padding: 0.75rem;
-    margin-bottom: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     background: rgba(0, 0, 0, 0.3);
     color: #e8e8e8;
     font-size: 1rem;
     resize: vertical;
+    min-height: 2.5rem;
 }
 
-.text-inputs textarea:focus {
+.text-box-item textarea:focus {
     outline: none;
     border-color: #e94560;
+}
+
+.text-box-item .remove-text-btn {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: rgba(233, 69, 96, 0.2);
+    color: #e94560;
+    border: 1px solid rgba(233, 69, 96, 0.5);
+    border-radius: 6px;
+    font-size: 1.25rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.text-box-item .remove-text-btn:hover {
+    background: rgba(233, 69, 96, 0.4);
 }
 
 .font-size-control {
@@ -171,14 +229,27 @@ h1 {
     accent-color: #e94560;
 }
 
+.share-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.share-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
 #download-btn {
-    width: 100%;
-    padding: 0.875rem 1.5rem;
+    padding: 0.5rem 1.25rem;
     background: #4ecca3;
     color: #1a1a2e;
     border: none;
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
@@ -193,6 +264,100 @@ h1 {
     cursor: not-allowed;
 }
 
+.share-tab {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.share-tab:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.share-tab.active {
+    background: rgba(233, 69, 96, 0.2);
+    color: #e94560;
+    border-color: #e94560;
+}
+
+.share-input-group {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.share-input-group.hidden {
+    display: none;
+}
+
+.share-input-group input {
+    flex: 1;
+    padding: 0.65rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    color: #e8e8e8;
+    font-size: 1rem;
+}
+
+.share-input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.share-input-group input:focus {
+    outline: none;
+    border-color: #e94560;
+}
+
+.share-input-group button {
+    padding: 0.65rem 1.25rem;
+    background: #e94560;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.share-input-group button:hover:not(:disabled) {
+    background: #ff6b6b;
+}
+
+.share-input-group button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.share-status {
+    display: block;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    min-height: 1.2em;
+}
+
+.share-status.loading {
+    color: #e94560;
+    font-style: italic;
+}
+
+.share-status.success {
+    color: #4ecca3;
+}
+
+.share-status.error {
+    color: #ff6b6b;
+}
+
 .preview-section {
     position: relative;
     background: rgba(0, 0, 0, 0.2);
@@ -202,6 +367,7 @@ h1 {
     justify-content: center;
     align-items: center;
     min-height: 300px;
+    margin-bottom: 1.5rem;
 }
 
 #meme-canvas {

@@ -1,0 +1,13 @@
+/* Base styles for meme feed app */
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #0f0f0f;
+  color: #e0e0e0;
+}
+#root {
+  min-height: 100vh;
+}

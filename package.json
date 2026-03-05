@@ -5,11 +5,20 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "dev:feed": "vite",
+    "build:feed": "vite build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.0",
+    "@instantdb/react": "^0.22.153",
+    "@vitejs/plugin-react": "^4.7.0",
     "dotenv": "^16.3.1",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "nodemailer": "^8.0.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "twilio": "^5.12.2",
+    "vite": "^5.4.21"
   }
 }
