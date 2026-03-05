@@ -12,10 +12,10 @@ const rules = {
       view: 'true',
       create: 'auth.id != null',
       update: 'isCreator || (auth.id != null && onlyModifiesVoteCount)',
-      delete: 'auth.id == data.ref("$user.id")',
+      delete: 'auth.id in data.ref("$user.id")',
     },
     bind: {
-      isCreator: 'auth.id == data.ref("$user.id")',
+      isCreator: 'auth.id in data.ref("$user.id")',
       onlyModifiesVoteCount: "request.modifiedFields.all(field, field in ['voteCount'])",
     },
   },
@@ -24,7 +24,7 @@ const rules = {
       view: 'true',
       create: 'auth.id != null',
       update: 'false',
-      delete: 'auth.id == data.ref("$user.id")',
+      delete: 'auth.id in data.ref("$user.id")',
     },
   },
   $files: {
@@ -32,6 +32,11 @@ const rules = {
       view: 'true',
       create: 'auth.id != null',
       delete: 'auth.id != null',
+    },
+  },
+  $users: {
+    allow: {
+      view: 'true',
     },
   },
 } satisfies InstantRules;

@@ -17,6 +17,7 @@ type MemeEntity = {
   voteCount: number;
   createdAt: number;
   $file?: { id: string; url: string; path?: string } | null;
+  $user?: { id: string } | null; // Creator
   votes?: Array<{ id: string; $user?: { id: string } | null }>;
 };
 
@@ -40,6 +41,7 @@ export default function Feed({ user }: FeedProps) {
   const query = {
     memes: {
       $file: {},
+      $user: {}, // Creator - used to show Delete button
       votes: { $user: {} },
       $: { order: { createdAt: 'desc' as const } },
     },
@@ -84,6 +86,7 @@ export default function Feed({ user }: FeedProps) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {memes.map((meme) => {
             const hasVoted = user && meme.votes?.some((v) => v.$user?.id === user.id);
+            const isCreator = user && meme.$user?.id === user.id;
             return (
               <article
                 key={meme.id}
@@ -157,22 +160,57 @@ export default function Feed({ user }: FeedProps) {
                       ▲ {meme.voteCount}
                     </button>
                   </div>
-                  {meme.$file?.url && (
-                    <button
-                      onClick={() => downloadMeme(meme.$file!.url)}
-                      style={{
-                        padding: '8px 16px',
-                        cursor: 'pointer',
-                        background: '#333',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: 8,
-                        fontWeight: 500,
-                      }}
-                    >
-                      Download
-                    </button>
-                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {meme.$file?.url && (
+                      <button
+                        onClick={() => downloadMeme(meme.$file!.url)}
+                        style={{
+                          padding: '8px 16px',
+                          cursor: 'pointer',
+                          background: '#333',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: 8,
+                          fontWeight: 500,
+                        }}
+                      >
+                        Download
+                      </button>
+                    )}
+                    {user && (
+                      <button
+                        onClick={async () => {
+                          if (!isCreator) return;
+                          try {
+                            if (meme.$file?.id) {
+                              await db.transact([
+                                db.tx.memes[meme.id].delete(),
+                                db.tx.$files[meme.$file.id].delete(),
+                              ]);
+                            } else {
+                              await db.transact(db.tx.memes[meme.id].delete());
+                            }
+                          } catch (err) {
+                            console.error('Delete failed:', err);
+                          }
+                        }}
+                        disabled={!isCreator}
+                        title={isCreator ? 'Delete meme' : 'Only the creator can delete'}
+                        style={{
+                          padding: '8px 16px',
+                          cursor: isCreator ? 'pointer' : 'not-allowed',
+                          background: isCreator ? '#7f1d1d' : '#333',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: 8,
+                          fontWeight: 500,
+                          opacity: isCreator ? 1 : 0.6,
+                        }}
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
                 </div>
               </article>
             );
