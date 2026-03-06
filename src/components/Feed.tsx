@@ -1,7 +1,9 @@
 /**
  * Meme feed component. Fetches memes from InstantDB, ordered by createdAt (newest first).
  * Supports upvote/unvote (requires sign-in) and download.
+ * Tap a meme image to view it full screen.
  */
+import { useState } from 'react';
 import { id } from '@instantdb/react';
 import { db } from '../../lib/db';
 
@@ -15,11 +17,20 @@ type MemeEntity = {
   id: string;
   textBoxes: unknown;
   voteCount: number;
-  createdAt: number;
+  createdAt: number | Date;
   $file?: { id: string; url: string; path?: string } | null;
   $user?: { id: string } | null; // Creator
   votes?: Array<{ id: string; $user?: { id: string } | null }>;
 };
+
+/** Format meme createdAt for display */
+function formatMemeDate(createdAt: number | Date): string {
+  const d = typeof createdAt === 'number' ? new Date(createdAt) : createdAt;
+  return d.toLocaleString(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+}
 
 /** Fetches image from URL and triggers download. Falls back to opening in new tab if fetch fails (CORS). */
 async function downloadMeme(url: string) {
@@ -38,6 +49,8 @@ async function downloadMeme(url: string) {
 }
 
 export default function Feed({ user }: FeedProps) {
+  const [fullScreenMeme, setFullScreenMeme] = useState<MemeEntity | null>(null);
+
   const query = {
     memes: {
       $file: {},
@@ -68,6 +81,7 @@ export default function Feed({ user }: FeedProps) {
   const memes = (data?.memes ?? []) as MemeEntity[];
 
   return (
+    <>
     <main style={{ maxWidth: 640, margin: '0 auto', padding: 24 }}>
       {memes.length === 0 ? (
         <div
@@ -98,7 +112,15 @@ export default function Feed({ user }: FeedProps) {
               >
                 <div style={{ position: 'relative', background: '#000' }}>
                   {meme.$file?.url ? (
-                    <img src={meme.$file.url} alt="Meme" style={{ width: '100%', display: 'block' }} />
+                    <img
+                      src={meme.$file.url}
+                      alt="Meme"
+                      style={{ width: '100%', display: 'block', cursor: 'pointer' }}
+                      onClick={() => setFullScreenMeme(meme)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => e.key === 'Enter' && setFullScreenMeme(meme)}
+                    />
                   ) : (
                     <div
                       style={{
@@ -159,6 +181,9 @@ export default function Feed({ user }: FeedProps) {
                     >
                       ▲ {meme.voteCount}
                     </button>
+                    <span style={{ fontSize: 12, color: '#888' }}>
+                      {formatMemeDate(meme.createdAt)}
+                    </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     {meme.$file?.url && (
@@ -218,5 +243,37 @@ export default function Feed({ user }: FeedProps) {
         </div>
       )}
     </main>
+
+    {fullScreenMeme?.$file?.url && (
+      <div
+        onClick={() => setFullScreenMeme(null)}
+        onKeyDown={(e) => e.key === 'Escape' && setFullScreenMeme(null)}
+        role="button"
+        tabIndex={0}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9999,
+          background: 'rgba(0,0,0,0.95)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 24,
+          cursor: 'pointer',
+        }}
+      >
+        <img
+          src={fullScreenMeme.$file.url}
+          alt="Meme (full screen)"
+          style={{
+            maxWidth: '100%',
+            maxHeight: '100%',
+            objectFit: 'contain',
+            borderRadius: 8,
+          }}
+        />
+      </div>
+    )}
+    </>
   );
 }
