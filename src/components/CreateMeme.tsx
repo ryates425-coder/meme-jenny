@@ -37,6 +37,7 @@ export default function CreateMeme({ user, onPostSuccess }: CreateMemeProps) {
   const [fontSize, setFontSize] = useState(48);
   const [selectedColor, setSelectedColor] = useState('#ffffff');
   const [suggestStatus, setSuggestStatus] = useState('');
+  const [isSuggesting, setIsSuggesting] = useState(false);
   const [postStatus, setPostStatus] = useState('');
   const [lastImageDataUrl, setLastImageDataUrl] = useState<string | null>(null);
   const [dragging, setDragging] = useState<number | null>(null);
@@ -133,12 +134,10 @@ export default function CreateMeme({ user, onPostSuccess }: CreateMemeProps) {
     img.onload = () => {
       URL.revokeObjectURL(url);
       setLoadedImage(img);
-      setTextBoxes((prev) => {
-        const next = [...prev];
-        if (next[0]) next[0].pos = { x: 0.5, y: 0.12 };
-        if (next[1]) next[1].pos = { x: 0.5, y: 0.88 };
-        return next;
-      });
+      setTextBoxes([
+        { text: '', pos: { x: 0.5, y: 0.12 } },
+        { text: '', pos: { x: 0.5, y: 0.88 } },
+      ]);
       suggestMemeText(file);
     };
     img.onerror = () => URL.revokeObjectURL(url);
@@ -147,6 +146,7 @@ export default function CreateMeme({ user, onPostSuccess }: CreateMemeProps) {
 
   const suggestMemeText = async (fileOrDataUrl: File | string) => {
     setSuggestStatus('Suggesting...');
+    setIsSuggesting(true);
     try {
       let dataUrl: string;
       if (typeof fileOrDataUrl === 'string') {
@@ -181,6 +181,8 @@ export default function CreateMeme({ user, onPostSuccess }: CreateMemeProps) {
         msg.includes('fetch') ? 'Run server (npm start) for suggestions' : msg || 'Suggestion failed'
       );
       setTimeout(() => setSuggestStatus(''), 4000);
+    } finally {
+      setIsSuggesting(false);
     }
   };
 
@@ -362,7 +364,7 @@ export default function CreateMeme({ user, onPostSuccess }: CreateMemeProps) {
         <button
           type="button"
           onClick={() => lastImageDataUrl && suggestMemeText(lastImageDataUrl)}
-          disabled={!lastImageDataUrl}
+          disabled={!lastImageDataUrl || isSuggesting}
           style={{
             width: '100%',
             padding: '8px 16px',
@@ -384,6 +386,7 @@ export default function CreateMeme({ user, onPostSuccess }: CreateMemeProps) {
             <button
               type="button"
               onClick={() => setTextBoxes((p) => [...p, { text: '', pos: { x: 0.5, y: 0.5 } }])}
+              disabled={isSuggesting}
               style={{
                 padding: '4px 12px',
                 background: 'rgba(78,204,163,0.2)',
@@ -402,6 +405,7 @@ export default function CreateMeme({ user, onPostSuccess }: CreateMemeProps) {
               <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                 <textarea
                   value={box.text}
+                  disabled={isSuggesting}
                   onChange={(e) => {
                     const v = e.target.value;
                     setTextBoxes((p) => {
@@ -425,7 +429,7 @@ export default function CreateMeme({ user, onPostSuccess }: CreateMemeProps) {
                 <button
                   type="button"
                   onClick={() => textBoxes.length > 1 && setTextBoxes((p) => p.filter((_, j) => j !== i))}
-                  disabled={textBoxes.length <= 1}
+                  disabled={textBoxes.length <= 1 || isSuggesting}
                   style={{
                     width: 32,
                     height: 32,
@@ -499,22 +503,48 @@ export default function CreateMeme({ user, onPostSuccess }: CreateMemeProps) {
         }}
       >
         {hasImage ? (
-          <canvas
-            ref={canvasRef}
-            onMouseDown={handleCanvasPointerDown}
-            onMouseMove={handleCanvasPointerMove}
-            onMouseUp={handleCanvasPointerUp}
-            onMouseLeave={handleCanvasPointerUp}
-            onTouchStart={handleCanvasPointerDown}
-            onTouchMove={handleCanvasPointerMove}
-            onTouchEnd={handleCanvasPointerUp}
-            style={{
-              maxWidth: '100%',
-              height: 'auto',
-              borderRadius: 8,
-              cursor: dragging !== null ? 'grabbing' : 'default',
-            }}
-          />
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <canvas
+              ref={canvasRef}
+              onMouseDown={handleCanvasPointerDown}
+              onMouseMove={handleCanvasPointerMove}
+              onMouseUp={handleCanvasPointerUp}
+              onMouseLeave={handleCanvasPointerUp}
+              onTouchStart={handleCanvasPointerDown}
+              onTouchMove={handleCanvasPointerMove}
+              onTouchEnd={handleCanvasPointerUp}
+              style={{
+                maxWidth: '100%',
+                height: 'auto',
+                borderRadius: 8,
+                cursor: dragging !== null ? 'grabbing' : 'default',
+              }}
+            />
+            {isSuggesting && (
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'rgba(0,0,0,0.6)',
+                  borderRadius: 8,
+                }}
+              >
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    border: '4px solid rgba(255,255,255,0.3)',
+                    borderTopColor: '#e94560',
+                    borderRadius: '50%',
+                    animation: 'spin 0.8s linear infinite',
+                  }}
+                />
+              </div>
+            )}
+          </div>
         ) : (
           <p style={{ color: 'rgba(255,255,255,0.5)' }}>Upload an image to get started</p>
         )}
