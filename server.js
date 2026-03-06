@@ -82,7 +82,7 @@ app.post('/api/suggest', async (req, res) => {
     }
 
     const anthropic = new Anthropic({ apiKey });
-    const model = process.env.ANTHROPIC_MODEL || 'claude-3-5-sonnet-20241022';
+    const model = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5';
 
     try {
         const message = await anthropic.messages.create({

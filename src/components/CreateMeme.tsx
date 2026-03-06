@@ -196,7 +196,7 @@ export default function CreateMeme({ user, onPostSuccess }: CreateMemeProps) {
     new Promise<string>((resolve) => {
       const img = new Image();
       img.onload = () => {
-        const maxDim = 768;
+        const maxDim = 512;
         let w = img.width,
           h = img.height;
         if (w > maxDim || h > maxDim) {
