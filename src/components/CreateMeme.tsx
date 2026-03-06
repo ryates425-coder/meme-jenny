@@ -177,7 +177,9 @@ export default function CreateMeme({ user, onPostSuccess }: CreateMemeProps) {
       setTimeout(() => setSuggestStatus(''), 2000);
     } catch (err) {
       const msg = (err as Error).message;
-      setSuggestStatus(msg.includes('fetch') ? 'Run server (npm start) for suggestions' : 'Suggestion failed');
+      setSuggestStatus(
+        msg.includes('fetch') ? 'Run server (npm start) for suggestions' : msg || 'Suggestion failed'
+      );
       setTimeout(() => setSuggestStatus(''), 4000);
     }
   };
