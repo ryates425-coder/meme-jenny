@@ -82,10 +82,11 @@ app.post('/api/suggest', async (req, res) => {
     }
 
     const anthropic = new Anthropic({ apiKey });
+    const model = process.env.ANTHROPIC_MODEL || 'claude-3-5-sonnet-20241022';
 
     try {
         const message = await anthropic.messages.create({
-            model: 'claude-sonnet-4-6',
+            model,
             max_tokens: 150,
             messages: [
                 {
@@ -128,10 +129,21 @@ Keep each under 50 chars. Output ONLY the two lines, nothing else. No numbering,
 
         res.json({ topText, bottomText });
     } catch (err) {
-        console.error('Claude API error:', err.message);
+        const msg = err?.message || String(err);
+        const status = err?.status;
+        const type = err?.type;
+        console.error('Claude API error:', { message: msg, status, type, model });
+        const userMsg =
+            status === 401
+                ? 'Invalid API key. Check ANTHROPIC_API_KEY in Railway variables.'
+                : status === 429
+                  ? 'Rate limit exceeded. Try again in a moment.'
+                  : status === 400
+                    ? 'Invalid request (check image size < 5MB).'
+                    : msg || 'Failed to get AI suggestions.';
         res.status(500).json({
             error: 'Suggestion failed',
-            message: err.message || 'Failed to get AI suggestions.',
+            message: userMsg,
         });
     }
 });

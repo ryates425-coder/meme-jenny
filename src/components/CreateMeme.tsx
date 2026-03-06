@@ -196,7 +196,7 @@ export default function CreateMeme({ user, onPostSuccess }: CreateMemeProps) {
     new Promise<string>((resolve) => {
       const img = new Image();
       img.onload = () => {
-        const maxDim = 800;
+        const maxDim = 768;
         let w = img.width,
           h = img.height;
         if (w > maxDim || h > maxDim) {
@@ -213,7 +213,7 @@ export default function CreateMeme({ user, onPostSuccess }: CreateMemeProps) {
         c.height = h;
         const ctx = c.getContext('2d')!;
         ctx.drawImage(img, 0, 0, w, h);
-        resolve(c.toDataURL('image/jpeg', 0.85));
+        resolve(c.toDataURL('image/jpeg', 0.8));
       };
       img.onerror = () => resolve(dataUrl);
       img.src = dataUrl;
